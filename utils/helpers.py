@@ -51,3 +51,47 @@ def format_user(user):
     return f"{user.name}#{user.discriminator} ({user.id})"
 
 def format_timestamp(timestamp):
+    """Format a timestamp for display"""
+    if isinstance(timestamp, str):
+        # If it's already a string, return as is
+        return timestamp
+    return timestamp.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+def get_member_top_role(member):
+    """Get the highest role of a member"""
+    if member.roles:
+        return max(member.roles, key=lambda role: role.position)
+    return None
+
+def has_higher_role(member1, member2):
+    """Check if member1 has a higher role than member2"""
+    role1 = get_member_top_role(member1)
+    role2 = get_member_top_role(member2)
+    
+    if not role1:
+        return False
+    if not role2:
+        return True
+    
+    return role1.position > role2.position
+
+def clean_content(content):
+    """Clean message content for logging"""
+    # Remove mentions and clean up formatting
+    content = re.sub(r'<@!?\d+>', '[User Mention]', content)
+    content = re.sub(r'<@&\d+>', '[Role Mention]', content)
+    content = re.sub(r'<#\d+>', '[Channel Mention]', content)
+    return content
+
+def chunk_list(lst, chunk_size):
+    """Split a list into chunks of specified size"""
+    for i in range(0, len(lst), chunk_size):
+        yield lst[i:i + chunk_size]
+
+def is_valid_discord_id(user_id):
+    """Check if a string is a valid Discord user ID"""
+    try:
+        user_id = int(user_id)
+        return 17 <= len(str(user_id)) <= 19
+    except ValueError:
+        return False
